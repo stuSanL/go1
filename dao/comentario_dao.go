@@ -8,14 +8,19 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-func ReadByID(ID string, ctx context.Context, client *firestore.Client) *model.Comentario {
+//func Create(c model.Comentario, ctx context.Context, client *firestore.Client) error {
+//	client.Collection("").Add(ctx, c)
+//}
+
+func ReadByID(ID string, ctx context.Context, client *firestore.Client) (model.Comentario, error) {
 	dsnap, err := client.Collection("comentário").Doc(ID).Get(ctx)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	var c model.Comentario
-	if err = dsnap.DataTo(&c); err != nil {
+	var cDTO model.ComentarioDTO
+	if err = dsnap.DataTo(&cDTO); err != nil {
 		log.Fatalln(err)
 	}
-	return &c
+	cDTO.ID = ID
+	return cDTO.ToEntity(ctx)
 }

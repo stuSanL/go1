@@ -33,8 +33,11 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	u := dao.ReadByID("com1", ctx, client)
-	fmt.Print(u.ID, " ", u.Comentario, " ", u.Usuario)
+	u, err := dao.ReadByID("com1", ctx, client)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Print(u.ID, "", u.Comentario, " ", u.Usuario)
 
 	defer client.Close()
 }
