@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 
+	"cloud.google.com/go/firestore"
 	"firebase.google.com/go"
 	"github.com/joho/godotenv"
 	"google.golang.org/api/option"
@@ -33,12 +34,18 @@ func main() {
 		log.Fatalln("Erro ao instanciar novo Firestore: ", err)
 	}
 
-	c, err := dao.ComentarioReadById("com2", ctx, client)
-	if err != nil {
-		log.Fatalln("Erro ao ler Comentario: ", err)
-	}
-	c.ID = "com3"
-	fmt.Println(c)
+	u := dao.UserReadByFirst("Ada", ctx, client)
+	us := u[0]
+	fmt.Println(us)
 
-	defer client.Close()
+	cms := dao.FindComentariosByUser(us, ctx, client)
+
+	fmt.Println(cms)
+
+	defer func(client *firestore.Client) {
+		err := client.Close()
+		if err != nil {
+			log.Println("Erro ao encerrar client: ", err)
+		}
+	}(client)
 }
