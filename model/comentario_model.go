@@ -2,7 +2,7 @@ package model
 
 import (
 	"context"
-	"log"
+	"fmt"
 
 	"cloud.google.com/go/firestore"
 )
@@ -20,24 +20,42 @@ type ComentarioDTO struct {
 }
 
 func (c ComentarioDTO) ToEntity(ctx context.Context) (Comentario, error) {
+	if c.Usuario == nil {
+		return Comentario{}, fmt.Errorf("[ComentarioDTO] referência de usuário nula para o comentário %q", c.ID)
+	}
+
 	uId := c.Usuario.ID
 	usnap, err := c.Usuario.Get(ctx)
+
 	if err != nil {
-		log.Fatalln("Erro ao obter snapshot de Usuário: ", err)
+		return Comentario{}, fmt.Errorf("[ComentarioDTO] erro ao obter snapshot de usuário (%s): %w", uId, err)
 	}
+
+	if !usnap.Exists() {
+		return Comentario{}, fmt.Errorf("[ComentarioDTO] usuário (%s) não encontrado", uId)
+	}
+
 	var uDTO UserDTO
-	if err = usnap.DataTo(&uDTO); err != nil {
-		log.Fatalln("Erro ao criar DTO de usuário: ", err)
+	if err := usnap.DataTo(&uDTO); err != nil {
+		return Comentario{}, fmt.Errorf("[ComentarioDTO] erro ao converter snapshot do usuário (%s) para DTO: %w", uId, err)
 	}
-	u, err := uDTO.ToEntity()
-	if err != nil {
-		log.Fatalln("Erro ao criar usuário: ", err)
-	}
+
+	u := uDTO.ToEntity()
 	u.Id = uId
+
 	return Comentario{
 		ID:         c.ID,
 		Comentario: c.Comentario,
 		Usuario:    u,
-	}, err
+	}, nil
+}
 
+func (c Comentario) ToMap(client *firestore.Client) (string, map[string]any) {
+	id := c.ID
+	uref := client.Collection("comentario").Doc(c.Usuario.Id)
+	m := map[string]any{
+		"comentario": c.Comentario,
+		"usuario":    uref,
+	}
+	return id, m
 }

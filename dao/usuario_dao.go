@@ -8,15 +8,23 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-func ReadById(id string, ctx context.Context, cliente *firestore.Client) *model.User {
-	dsnap, err := cliente.Collection("users").Doc(id).Get(ctx)
+func UserCreate(u model.User, ctx context.Context, client *firestore.Client) {
+	id, m := u.ToMap()
+	_, err := client.Collection("users").Doc(id).Set(ctx, m, firestore.MergeAll)
+	if err != nil {
+		log.Fatalln("Erro ao criar usuário: ", err)
+	}
+}
+
+func UserReadById(id string, ctx context.Context, client *firestore.Client) (model.User, error) {
+	dsnap, err := client.Collection("users").Doc(id).Get(ctx)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	var u model.User
-	if err = dsnap.DataTo(&u); err != nil {
+	var uDTO model.UserDTO
+	if err = dsnap.DataTo(&uDTO); err != nil {
 		log.Fatalln(err)
 	}
-	u.Id = id
-	return &u
+	uDTO.Id = id
+	return uDTO.ToEntity(), err
 }

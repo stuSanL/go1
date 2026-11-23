@@ -3,11 +3,10 @@ package main
 import (
 	"awesomeProject/dao"
 	"context"
-	"fmt"
 	"log"
 	"os"
 
-	firebase "firebase.google.com/go"
+	"firebase.google.com/go"
 	"github.com/joho/godotenv"
 	"google.golang.org/api/option"
 )
@@ -21,23 +20,24 @@ func main() {
 	credentials := os.Getenv("CREDENTIALS_FILE")
 
 	ctx := context.Background()
-	sa := option.WithAuthCredentialsFile("", credentials)
+	sa := option.WithCredentialsFile(credentials)
 
 	app, err := firebase.NewApp(ctx, nil, sa)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("Erro ao criar novo aplicativo: ", err)
 	}
 
 	client, err := app.Firestore(ctx)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("Erro ao instanciar novo Firestore: ", err)
 	}
 
-	u, err := dao.ReadByID("com1", ctx, client)
+	c, err := dao.ComentarioReadById("com2", ctx, client)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("Erro ao ler Comentario: ", err)
 	}
-	fmt.Print(u.ID, "", u.Comentario, " ", u.Usuario)
+	c.ID = "com3"
+	dao.ComentarioCreate(c, ctx, client)
 
 	defer client.Close()
 }
