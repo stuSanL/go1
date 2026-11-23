@@ -3,6 +3,7 @@ package main
 import (
 	"awesomeProject/dao"
 	"context"
+	"fmt"
 	"log"
 	"os"
 
@@ -20,7 +21,7 @@ func main() {
 	credentials := os.Getenv("CREDENTIALS_FILE")
 
 	ctx := context.Background()
-	sa := option.WithCredentialsFile(credentials)
+	sa := option.WithAuthCredentialsFile(option.ServiceAccount, credentials)
 
 	app, err := firebase.NewApp(ctx, nil, sa)
 	if err != nil {
@@ -37,7 +38,7 @@ func main() {
 		log.Fatalln("Erro ao ler Comentario: ", err)
 	}
 	c.ID = "com3"
-	dao.ComentarioCreate(c, ctx, client)
+	fmt.Println(c)
 
 	defer client.Close()
 }
