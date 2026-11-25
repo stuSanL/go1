@@ -1,9 +1,7 @@
 package main
 
 import (
-	"awesomeProject/dao"
 	"context"
-	"fmt"
 	"log"
 	"os"
 
@@ -33,14 +31,6 @@ func main() {
 	if err != nil {
 		log.Fatalln("Erro ao instanciar novo Firestore: ", err)
 	}
-
-	u := dao.UserReadByFirst("Ada", ctx, client)
-	us := u[0]
-	fmt.Println(us)
-
-	cms := dao.FindComentariosByUser(us, ctx, client)
-
-	fmt.Println(cms)
 
 	defer func(client *firestore.Client) {
 		err := client.Close()

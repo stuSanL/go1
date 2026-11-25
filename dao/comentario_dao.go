@@ -10,16 +10,16 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func ComentarioCreate(c model.Comentario, ctx context.Context, client *firestore.Client) {
-	id, m := c.ToMap(client)
+func ComentarioSet(c model.Comentario, ctx context.Context, client *firestore.Client) {
+	id, m := c.ToMap()
 	_, err := client.Collection("comentário").Doc(id).Set(ctx, m)
 	if err != nil {
 		log.Fatalln("Erro ao criar Comentário: ", err)
 	}
 }
 
-func ComentarioReadById(ID string, ctx context.Context, client *firestore.Client) (model.Comentario, error) {
-	dsnap, err := client.Collection("comentário").Doc(ID).Get(ctx)
+func ComentarioReadById(id string, ctx context.Context, client *firestore.Client) (model.Comentario, error) {
+	dsnap, err := client.Collection("comentário").Doc(id).Get(ctx)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -27,11 +27,11 @@ func ComentarioReadById(ID string, ctx context.Context, client *firestore.Client
 	if err = dsnap.DataTo(&cDTO); err != nil {
 		log.Fatalln(err)
 	}
-	cDTO.ID = ID
+	cDTO.ID = id
 	return cDTO.ToEntity(ctx)
 }
 
-func FindComentariosByUser(u model.User, ctx context.Context, client *firestore.Client) []model.Comentario {
+func ComentariosFindByUser(u model.User, ctx context.Context, client *firestore.Client) []model.Comentario {
 	uref := client.Collection("users").Doc(u.Id)
 	snap := client.Collection("comentário").Where("usuario", "==", uref).Documents(ctx)
 	comentarios := make([]model.Comentario, 0)
@@ -60,4 +60,11 @@ func FindComentariosByUser(u model.User, ctx context.Context, client *firestore.
 		comentarios = append(comentarios, c)
 	}
 	return comentarios
+}
+
+func ComentarioDeleteById(id string, ctx context.Context, client *firestore.Client) {
+	_, err := client.Collection("comentário").Doc(id).Delete(ctx)
+	if err != nil {
+		log.Println("Erro ao excluir comentário: ", err)
+	}
 }

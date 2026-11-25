@@ -10,11 +10,11 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func UserCreate(u model.User, ctx context.Context, client *firestore.Client) {
+func UserSet(u model.User, ctx context.Context, client *firestore.Client) {
 	id, m := u.ToMap()
 	_, err := client.Collection("users").Doc(id).Set(ctx, m, firestore.MergeAll)
 	if err != nil {
-		log.Fatalln("Erro ao criar usuário: ", err)
+		log.Println("Erro ao criar usuário: ", err)
 	}
 }
 
@@ -51,14 +51,6 @@ func UserReadByFirst(first string, ctx context.Context, client *firestore.Client
 		users = append(users, user.ToEntity())
 	}
 	return users
-}
-
-func UserReplace(u model.User, ctx context.Context, client *firestore.Client) {
-	id, m := u.ToMap()
-	_, err := client.Collection("users").Doc(id).Set(ctx, m, firestore.MergeAll)
-	if err != nil {
-		log.Println(err)
-	}
 }
 
 func UserUpdateBornDate(u model.User, ctx context.Context, client *firestore.Client) {
